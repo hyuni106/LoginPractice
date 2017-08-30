@@ -1,6 +1,7 @@
 package com.example.user.loginpractice;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,7 +11,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.user.loginpractice.data.User;
 import com.example.user.loginpractice.util.ContextUtil;
+import com.facebook.login.LoginManager;
+import com.kakao.usermgmt.UserManagement;
+import com.kakao.usermgmt.callback.LogoutResponseCallback;
 
 public class MainActivity extends BaseActivity {
 
@@ -19,6 +24,8 @@ public class MainActivity extends BaseActivity {
     private android.widget.TextView nameTxt;
     private android.widget.Button logoutBtn;
     private android.widget.ImageView profileImg;
+
+    User me = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +42,13 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 ContextUtil.logoutProcess(mContext);
+
+//                페이스북 로그아웃
+                LoginManager.getInstance().logOut();
+
+//                카카오톡 로그아웃
+                UserManagement.requestLogout(null);
+
                 Toast.makeText(mContext, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(mContext, LoginActivity.class);
                 startActivity(intent);
@@ -45,10 +59,12 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void setValues() {
-        idTxt.setText(ContextUtil.getLoginUserId(mContext));
-        pwTxt.setText(ContextUtil.getLoginUserPw(mContext));
-        nameTxt.setText(ContextUtil.getLoginUserName(mContext));
-        Glide.with(mContext).load(ContextUtil.getLoginUserUrl(mContext)).into(profileImg);
+        me = ContextUtil.getLoginUser(mContext);
+
+        idTxt.setText(me.getId());
+        pwTxt.setText(me.getPassword());
+        nameTxt.setText(me.getName());
+        Glide.with(mContext).load(Uri.parse(me.getProfileURL())).into(profileImg);
     }
 
     @Override
